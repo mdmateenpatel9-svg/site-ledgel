@@ -1,6 +1,5 @@
 import { Routes, Route, Link } from 'react-router-dom'
 import { Layout, ProtectedRoute, Button } from './components/ui'
-import Login from './pages/Login.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import NewProject from './pages/NewProject.jsx'
 import ProjectDetail from './pages/ProjectDetail.jsx'
@@ -29,7 +28,6 @@ function NotFound() {
 export default function App() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
       <Route path="/" element={<Protected><Dashboard /></Protected>} />
       <Route path="/projects/new" element={<Protected><NewProject /></Protected>} />
       <Route path="/projects/:id" element={<Protected><ProjectDetail /></Protected>} />
