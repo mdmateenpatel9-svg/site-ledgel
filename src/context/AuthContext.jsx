@@ -10,15 +10,27 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let isMounted = true
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!isMounted) return
-      setUser(data.session?.user || null)
-      setLoading(false)
-    })
+    async function init() {
+      const { data } = await supabase.auth.getSession()
+      if (data.session?.user) {
+        if (isMounted) {
+          setUser(data.session.user)
+          setLoading(false)
+        }
+        return
+      }
+      const { data: anonData, error } = await supabase.auth.signInAnonymously()
+      if (isMounted) {
+        if (error) console.error('Anonymous sign-in failed:', error.message)
+        setUser(anonData?.user || null)
+        setLoading(false)
+      }
+    }
+
+    init()
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null)
-      setLoading(false)
     })
 
     return () => {
@@ -27,24 +39,9 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  async function signIn(email, password) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) throw error
-  }
-
-  async function signUp(email, password) {
-    const { error } = await supabase.auth.signUp({ email, password })
-    if (error) throw error
-  }
-
-  async function signOut() {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
-  }
-
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading }}>
       {children}
     </AuthContext.Provider>
   )
-        }
+}
